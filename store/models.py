@@ -42,13 +42,13 @@ class Customer(models.Model):
     birth_date=models.DateField(null=True)
     membership=models.CharField(max_length=1, choices=MEMBERSHIP_CHOICES, default='MEMBERSHIP_BRONZE')
 
-    # class Meta:
-    #     # Specify metadata options for the model
-    #     db_table = 'store_customers'  # Custom table name in the database
-    #     indexes = [   # Create an index on 'last_name' and 'first_name'
-    #     models.Index(fields=['last_name', 'first_name'])
-    #     # This improves search performance for queries filtering by these fields
-    #     ]
+    class Meta:
+        # Specify metadata options for the model
+        db_table = 'store_customers'  # Custom table name in the database
+        indexes = [   # Create an index on 'last_name' and 'first_name'
+        models.Index(fields=['last_name', 'first_name'])
+        # This improves search performance for queries filtering by these fields
+        ]
         
         
 class Order(models.Model):
