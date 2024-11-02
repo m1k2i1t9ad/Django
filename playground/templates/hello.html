@@ -1,0 +1,13 @@
+<html>
+  <body>
+    {% if name %}
+    <!--means if name is defined then the below line will be displayed-->
+    <h1>HELLO {{ name }}</h1>
+    <!--check out views.py to know the value of name-->
+    {% else %}
+    <!--means if name is not defined then the below text will be displayed -->
+    <h1>HELLO WORLD</h1>
+    {% endif %}
+    <!--ending the if-else statement-->
+  </body>
+</html>
