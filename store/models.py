@@ -44,7 +44,8 @@ class Customer(models.Model):
 
     class Meta:
         # Specify metadata options for the model
-        db_table = 'store_customer'  # Custom table name in the database
+        db_table = 'store_customers'  # Custom table name in the database
+
         indexes = [   # Create an index on 'last_name' and 'first_name'
         models.Index(fields=['last_name', 'first_name'])
         # This improves search performance for queries filtering by these fields
