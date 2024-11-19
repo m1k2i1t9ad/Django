@@ -34,11 +34,11 @@ INSTALLED_APPS = [   #every django project by default includes this apps:
     'django.contrib.admin',#the admin app gives an admin interface for managing our data
     'django.contrib.auth', #the auth app used for authenticating users
     'django.contrib.contenttypes', #the contenttypes app creates generic relationships between the models
-    # 'django.contrib.sessions',  # a session is temporary memory on the server for managing users data.these days when building APIs with django,we don't use the sessions app that's why it's commented
+    'django.contrib.sessions',  # a session is temporary memory on the server for managing users data.these days when building APIs with django,we don't use the sessions app that's why it's commented
     'django.contrib.messages', #the messages app displayes onetime notifications to the user
     'django.contrib.staticfiles',#the staticfiles app serves static files like images,css files and soon
     'playground', #adding our project here
-    'debug_toolbar' ,#addinf the debugging toolbar
+    'debug_toolbar' ,#adding the debugging toolbar
     'store',
     'tags',
     'likes'
