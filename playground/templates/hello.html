@@ -1,5 +1,32 @@
 <html>
   <body>
+    <ul>
+      <!--the for loop for the topica that include product as a queryset
+      {% for product in products%}          
+      <li>{{product.title}}</li>
+      {% endfor %}
+    -->
+
+      <!--the for loop for "defering fields" topic:
+    {% for product in products%}
+      <li>{{ product.title}} {{product.description}}</li>
+      {% endfor %}
+
+    -->
+      <!--the for loop for "selecting related objects" topic:
+      {% for product in products%}          
+      <li>{{ product.title}} - {{product.collection.title}}</li>
+      {% endfor %}
+
+    -->
+
+      <!--the for loop for "electing related objects:excersice" topic:
+      {% for order in orders%} 
+      <li>{{order.id}} -{{order.customer.first_name}}</li> 
+      {% endfor %}
+    --></ul>
+
+    <!--if statement for the "Aggeregating objects" topic-->
     {% if name %}
     <!--means if name is defined then the below line will be displayed-->
     <h1>HELLO {{ name }}</h1>
@@ -9,11 +36,7 @@
     <h1>HELLO WORLD</h1>
     {% endif %}
     <!--ending the if-else statement-->
-
-    <ul>
-      {% for product in products%}
-      <li>{{ product.title}}</li>
-      {% endfor %}
-    </ul>
+    {{result}}
+    <!--rendering the result object -->
   </body>
 </html>
