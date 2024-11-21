@@ -12,6 +12,22 @@ class Collection(models.Model):
     title=models.CharField(max_length=255)
     featured_product=models.ForeignKey(
         "Product", on_delete=models.SET_NULL, null=True, related_name='+' ) 
+    
+    
+    ####################################################################
+    #this part is for the "registering models" topic in the admin site section of the course:
+    
+    #a function that Returns the title of the model instance as its string representation.
+    def __str__(self) -> str:  
+    # Define the string representation of the object
+        return self.title  # Return the title attribute when the object is converted to a string
+    
+    #  a class that Specifies metadata for the model, including default ordering of query results by the title field.
+    class Meta:  
+    # Inner class to hold metadata for the model
+       ordering = ['title']  # Set the default ordering of query results by the title field in ascending order
+    #######################################################################
+
 class Product(models.Model):
     # sku=models.CharField(max_length=10,primary_key=True) #not needed
     title=models.CharField(max_length=255)
@@ -23,6 +39,22 @@ class Product(models.Model):
     collection=models.ForeignKey(Collection,on_delete=models.PROTECT) #the "PROTECT" value means that if you accidentally deleted Collection,we won't end up deleting all products in that Collection
     Promotions=models.ManyToManyField(Promotion)#manytomany relationships meaning product can have many promotions and a promotion can apply to defferent products
     
+    
+    
+    ####################################################################
+    #this part is for the "registering models" topic in the admin site section of the course:
+    
+    #a function that Returns the title of the model instance as its string representation.
+    def __str__(self) -> str:  
+    # Define the string representation of the object
+        return self.title  # Return the title attribute when the object is converted to a string
+    
+    #  a class that Specifies metadata for the model, including default ordering of query results by the title field.
+    class Meta:  
+    # Inner class to hold metadata for the model
+       ordering = ['title']  # Set the default ordering of query results by the title field in ascending order
+    #######################################################################
+
     
 class Customer(models.Model):
     MEMBERSHIP_BRONZE= 'B'
@@ -49,7 +81,17 @@ class Customer(models.Model):
         models.Index(fields=['last_name', 'first_name'])
         # This improves search performance for queries filtering by these fields
         ]
+        ordering=['first_name','last_name'] #set the ordering to firstname followed by the lastname
         
+    ####################################################################
+    #this part is for the "registering models" topic in the admin site section of the course:
+    
+    #a function that Returns the title of the model instance as its string representation.
+    def __str__(self) -> str:  
+    # Define the string representation of the object
+        return f'{self.first_name} {self.last_name}'  # Return the title attribute when the object is converted to a string
+    ####################################################################
+    
         
 class Order(models.Model):
     PAYMENT_STATUS_PENDING= 'P'

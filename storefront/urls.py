@@ -19,7 +19,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 import debug_toolbar
-#hello
+
+admin.site.site_header='Storefront Admin' #changin the header of the admin page which was "Django administration"
+admin.site.index_title='Admin' #changing the label (title) which was"site administration'
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('playground/', include('playground.urls')),
@@ -27,18 +31,3 @@ urlpatterns = [
 ]
 
 
-
-# #poe.com's code (since mosh's one didn't work for me):
-# from django.contrib import admin
-# from django.urls import path, include
-# from django.http import HttpResponse  # Import HttpResponse
-
-# # Define the home view
-# def home(request):
-#     return HttpResponse("Welcome to the Home Page")
-
-# urlpatterns = [
-#     path('', home, name='home'),  # Serve home page at root
-#     path('admin/', admin.site.urls),
-#     path('playground/', include('playground.urls')),
-# ]
