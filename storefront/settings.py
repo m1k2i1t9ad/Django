@@ -40,6 +40,7 @@ INSTALLED_APPS = [   #every django project by default includes this apps:
     'playground', #adding our project here
     'debug_toolbar' ,#adding the debugging toolbar
     'store',
+    'store_custom', #on the admin site,go to the "admin/store/product/add/" and then comment this line to see its use(obsesrve the difference that it will make on the site)
     'tags',
     'likes'
 ]

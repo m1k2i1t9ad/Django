@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.core.validators import MinValueValidator #google "django validators" to know more
 
 # Create your models here.
 
@@ -32,12 +32,15 @@ class Product(models.Model):
     # sku=models.CharField(max_length=10,primary_key=True) #not needed
     title=models.CharField(max_length=255)
     slug=models.SlugField()
-    description=models.TextField()
-    unit_price=models.DecimalField(max_digits=6,decimal_places=2) #decimalfield is better that floatfield for monetary values
+    description=models.TextField(null=True , blank=True) #the blank=True argument will make the description field optional on the admin interface
+    unit_price=models.DecimalField(  #decimalfield is better that floatfield for monetary values
+        max_digits=6,
+        decimal_places=2,
+        validators=[MinValueValidator(1)]) #this validation will set the unitprice min value to 1,so if we typed a number lessthan 1, it will display a default error message
     inventory=models.IntegerField()
     last_update=models.DateTimeField(auto_now=True)
     collection=models.ForeignKey(Collection,on_delete=models.PROTECT) #the "PROTECT" value means that if you accidentally deleted Collection,we won't end up deleting all products in that Collection
-    Promotions=models.ManyToManyField(Promotion)#manytomany relationships meaning product can have many promotions and a promotion can apply to defferent products
+    Promotions=models.ManyToManyField(Promotion,blank=True)#manytomany relationships meaning product can have many promotions and a promotion can apply to defferent products
     
     
     
@@ -111,7 +114,7 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     order=models.ForeignKey(Order,on_delete=models.PROTECT, related_name='+') #"PROTECT" means that if you accidentaly delete an order,you don't endup deleting the orderItems
-    product=models.ForeignKey(Order,on_delete=models.PROTECT, related_name='+') #"PROTECT" means that if you accidentaly delete a product,you don't endup deleting the orderItems
+    product=models.ForeignKey(Product,on_delete=models.PROTECT, related_name='+') #"PROTECT" means that if you accidentaly delete a product,you don't endup deleting the orderItems
     quantity=models.PositiveIntegerField()
     unit_price=models.DecimalField(max_digits=6,decimal_places=2)    
 

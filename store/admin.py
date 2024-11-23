@@ -1,13 +1,12 @@
 from django.contrib import admin,messages
-from . import models
+from . import models 
 from django.db.models.aggregates import Count
 #for the "providing links to other pages" topic :
 from django.utils.html import format_html ,urlencode
 from django.urls import reverse
 from django.db.models import QuerySet
 from django.contrib import messages
-
-# Register your models here.\
+# Register your models here.:
 ######################################################
 #Registering models:
 # @admin.register(models.Product) #better way of registering the product than "admin.site.register(models.Product)"
@@ -26,8 +25,8 @@ class CustomerAdmin(admin.ModelAdmin):
 #for example if we wanted to search the first_name and the last_name of the customer:
     search_fields=['first_name__istartswith','last_name__istartswith'] # the startswith lookup is for sorting and the 'i' is to make  case-insensitive
 
-#############################################################
 
+#
 class InventoryFilter(admin.SimpleListFilter):
     title='inventory'
     parameter_name='inventory'
@@ -49,6 +48,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_display=['title','unit_price','inventory_status']
     list_editable=['unit_price']
     list_per_page=10
+    search_fields = ['title', 'description']
     
     @admin.display(ordering='inventory') #choosing the inventory field to sort the data in this column
     def inventory_status(self,product): # a function that checks if the inventory status is low or ok
@@ -84,8 +84,7 @@ class ProductAdmin(admin.ModelAdmin):
     prepopulated_fields={
         'slug':['title'] #prepopulating the slug field based on the title field meaning when we type onthe title, the slug will be automatically populated(typed) too
     }
-    autocomplete_fields=['collection']
-    #to find out more options , google django model admin and then on the page click the "model admin options"
+    autocomplete_fields=['collection'] #to find out more options , google "django model admin" and then on the page click the "model admin options"
 #############################################################
 #Selecting related objects:
     list_display=['title','unit_price','inventory_status','collection_title']
@@ -94,10 +93,28 @@ class ProductAdmin(admin.ModelAdmin):
     def collection_title(self,product):
         return product.collection.title
     
-#excersice:set up the order page where we can see our orders and their customers:
+#excersice:set up the order page where we can see our orders and their customers(it is done i.e check out the first line on the orderAdmin class)
+
+##############################################################################
+#editing Childrren Using inliners:
+
+#so currently, we can create a new order but there is no way to manage the item to an order
+#if we want to manage them on the addorder page,then:
+
+class OrderItemLine(admin.TabularInline): #use the "admin.StackedInline" to represent each item as a separate form
+    model=models.OrderItem
+    autocomplete_fields=['product']
+    extra=0 #this removes the default displayed placeholders(comment the code to see the default output or change the number to see the difference)
+    #also we can set the min and maxnumber of items for our order:
+    min_num=1
+    max_num=10
+    
 @admin.register(models.Order)
 class OrderAdmin(admin.ModelAdmin):
+    autocomplete_fields=['customer'] #customizing the customer field in the add order page
     list_display=['id','placed_at','customer']
+    inlines=[OrderItemLine]
+    
 
 #############################################################
 #overriding the base queryset:
