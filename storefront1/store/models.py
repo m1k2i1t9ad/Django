@@ -11,7 +11,7 @@ class Promotion(models.Model):
 class Collection(models.Model):
     title=models.CharField(max_length=255)
     featured_product=models.ForeignKey(
-        "Product", on_delete=models.SET_NULL, null=True, related_name='+' ) 
+        "Product", on_delete=models.SET_NULL, null=True, blank=True) 
     
     
     ####################################################################
@@ -37,10 +37,10 @@ class Product(models.Model):
         max_digits=6,
         decimal_places=2,
         validators=[MinValueValidator(1)]) #this validation will set the unitprice min value to 1,so if we typed a number lessthan 1, it will display a default error message
-    inventory=models.IntegerField()
+    inventory=models.IntegerField(validators=[MinValueValidator(0)])
     last_update=models.DateTimeField(auto_now=True)
-    collection=models.ForeignKey(Collection,on_delete=models.PROTECT) #the "PROTECT" value means that if you accidentally deleted Collection,we won't end up deleting all products in that Collection
-    Promotions=models.ManyToManyField(Promotion,blank=True)#manytomany relationships meaning product can have many promotions and a promotion can apply to defferent products
+    collection=models.ForeignKey(Collection,on_delete=models.PROTECT,related_name='products') #the "PROTECT" value means that if you accidentally deleted Collection,we won't end up deleting all products in that Collection
+    promotions=models.ManyToManyField(Promotion,blank=True)#manytomany relationships meaning product can have many promotions and a promotion can apply to defferent products
     
     
     
@@ -74,8 +74,18 @@ class Customer(models.Model):
     email=models.EmailField(unique=True)
     phone=models.CharField(max_length=15)
     birth_date=models.DateField(null=True)
-    membership=models.CharField(max_length=1, choices=MEMBERSHIP_CHOICES, default='MEMBERSHIP_BRONZE')
+    membership=models.CharField(max_length=1, choices=MEMBERSHIP_CHOICES, default=MEMBERSHIP_BRONZE)
 
+    ####################################################################
+    #this part is for the "registering models" topic in the admin site section of the course:
+    
+    #a function that Returns the title of the model instance as its string representation.
+    def __str__(self):  
+    # Define the string representation of the object
+        return f'{self.first_name} {self.last_name}'  # Return the title attribute when the object is converted to a string
+    ####################################################################
+    
+      
     class Meta:
         # Specify metadata options for the model
         db_table = 'store_customers'  # Custom table name in the database
@@ -86,16 +96,7 @@ class Customer(models.Model):
         ]
         ordering=['first_name','last_name'] #set the ordering to firstname followed by the lastname
         
-    ####################################################################
-    #this part is for the "registering models" topic in the admin site section of the course:
-    
-    #a function that Returns the title of the model instance as its string representation.
-    def __str__(self) -> str:  
-    # Define the string representation of the object
-        return f'{self.first_name} {self.last_name}'  # Return the title attribute when the object is converted to a string
-    ####################################################################
-    
-        
+  
 class Order(models.Model):
     PAYMENT_STATUS_PENDING= 'P'
     PAYMENT_STATUS_COMPLETE= 'C'
@@ -113,8 +114,8 @@ class Order(models.Model):
     # note:in fact, you should never delete orders from from your database 
 
 class OrderItem(models.Model):
-    order=models.ForeignKey(Order,on_delete=models.PROTECT, related_name='+') #"PROTECT" means that if you accidentaly delete an order,you don't endup deleting the orderItems
-    product=models.ForeignKey(Product,on_delete=models.PROTECT, related_name='+') #"PROTECT" means that if you accidentaly delete a product,you don't endup deleting the orderItems
+    order=models.ForeignKey(Order,on_delete=models.PROTECT) #"PROTECT" means that if you accidentaly delete an order,you don't endup deleting the orderItems
+    product=models.ForeignKey(Product,on_delete=models.PROTECT, related_name='orderitems') #"PROTECT" means that if you accidentaly delete a product,you don't endup deleting the orderItems
     quantity=models.PositiveIntegerField()
     unit_price=models.DecimalField(max_digits=6,decimal_places=2)    
 
