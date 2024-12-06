@@ -47,7 +47,7 @@ router.register('products',views.ProductViewset,basename='products') #here we're
 router.register('collections', views.CollectionViewSet)
 router.register('carts',views.CartViewSet)
 router.register('customers',views.CustomerViewSet)
-router.register('orders',views.OrderViewset)
+router.register('orders',views.OrderViewset, basename='orders')
 products_router=routers.NestedDefaultRouter(router,'products',lookup='product')
 #now on this router, we gonna register a child resource i.e reviews:
 products_router.register('reviews',views.ReviewViewSet,basename='product-reviews')#the reason we explicitly set the basename by ourselves is that  by default, django use the queryset attribute to figureout the basename but since we deleted this attribute and now we have a method(on the prodyctviewset),DRF can't figureout what the basename should be called based on the method's logic cuz it's too complex for it

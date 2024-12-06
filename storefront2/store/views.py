@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .models import Product, Collection,Review,Cart,CartItem,Customer,Order,OrderItem
-from .serializers import ProductSerializer,CollectionSerializer,ReviewSerializer,CartSerializer,CartItemSerializer,AddCartItemSerializer,UpdateCartItemSerializer,CustomerSerializer,OrderSerializer,OrderItemSerializer
+from .serializers import ProductSerializer,CollectionSerializer,ReviewSerializer,CartSerializer,CartItemSerializer,AddCartItemSerializer,UpdateCartItemSerializer,CustomerSerializer,OrderSerializer,OrderItemSerializer,CreateOrderSerializer,UpdateOrderSerializer
 from rest_framework import status
 from django.db.models.aggregates import Count
 from rest_framework.views import APIView #this is the base class for all class based views
@@ -350,7 +350,7 @@ class CustomerViewSet(ModelViewSet):
     @action(detail=False, methods=['GET','PUT'],permission_classes=[IsAuthenticated]) #setting the detail to false means that the action will be available on the list not on the detail view
     def me(self, request):
         # Retrieve or create the customer profile for the current user
-        (customer,created)=Customer.objects.get_or_create(user_id=request.user.id)
+        customer=Customer.objects.get(user_id=request.user.id)
         if request.method=='GET':
             serializer=CustomerSerializer(customer)
             return Response(serializer.data)
@@ -362,5 +362,41 @@ class CustomerViewSet(ModelViewSet):
         
         
 class OrderViewset(ModelViewSet):
-    queryset=Order.objects.all()
-    serializer_class=OrderSerializer
+    # queryset=Order.objects.all() #if we want all the niggaz to access all the orders
+    # serializer_class=OrderSerializer
+    # permission_classes=[IsAuthenticated] #if we want all the autheticated users to be able to delete and update the orders 
+    #but if we wanted to allow that only to the admin users,we need to overwrite the get_permissions method:
+    http_method_names=['get','post','patch','delete','head','options']
+    def get_permissions(self):
+        if self.request.method in ['PATCH','DELETE']:
+            return [IsAdminUser()]
+        return [IsAuthenticated()]
+    
+    #returning the created order:to do that we need to overwrite the createmodelmixin:
+    def create(self,request, *args,**kwargs):
+        serialzer=CreateOrderSerializer(
+            data=request.data,
+            context={'user_id':self.request.user.id}
+        )
+        serialzer.is_valid(raise_exception=True)
+        order=serialzer.save()
+        serialzer=OrderSerializer(order)
+        return Response(serialzer.data)
+    
+    
+    def get_serializer_class(self):
+        if self.request.method=='POST':
+            return CreateOrderSerializer
+        elif self.request.method=='PATCH':
+            return UpdateOrderSerializer
+        return OrderSerializer
+    
+    #if we wanted to make all the orders available only for the admin users, then we need to overwrite the get queryset method:
+    def get_queryset(self):
+        user=self.request.user
+        if user.is_staff:
+            return Order.objects.all()  # Admins can access all orders
+        
+        customer_id=Customer.objects.only('id').get(user_id=user.id)
+        return Order.objects.filter(customer_id=customer_id)
+    

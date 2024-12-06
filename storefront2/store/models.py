@@ -131,7 +131,7 @@ class Order(models.Model):
 
 
 class OrderItem(models.Model):
-    order=models.ForeignKey(Order,on_delete=models.PROTECT, related_name='+') #"PROTECT" means that if you accidentaly delete an order,you don't endup deleting the orderItems
+    order=models.ForeignKey(Order,on_delete=models.PROTECT, related_name='items') #"PROTECT" means that if you accidentaly delete an order,you don't endup deleting the orderItems
     product=models.ForeignKey(Product,on_delete=models.PROTECT, related_name='orderitems') #"PROTECT" means that if you accidentaly delete a product,you don't endup deleting the orderItems
     quantity=models.PositiveIntegerField()
     unit_price=models.DecimalField(max_digits=6,decimal_places=2)    

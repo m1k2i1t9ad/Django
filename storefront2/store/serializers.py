@@ -2,8 +2,8 @@ from rest_framework import serializers
 from store.models import Product,Collection,Review,Cart,CartItem,Customer,Order,OrderItem
 from decimal import Decimal
 from django.db.models.aggregates import Count
-
-
+from django.db import transaction
+from store.signals import order_created
 '''
 #creating serializers:
 class CollectionSerializer(serializers.Serializer):
@@ -184,15 +184,60 @@ class CustomerSerializer(serializers.ModelSerializer):
         
         
 class OrderItemSerializer(serializers.ModelSerializer):
-    id=serializers.UUIDField(read_only=True)      
+    # id=serializers.UUIDField(read_only=True)      
     product = SimpleProductSerializer() #we used this  serializer instead of ProductSerilaizer cuz we only wanted some of fileds of the product to be displayed(not all of them) 
     class Meta:
-        model = CartItem
-        fields = ['id','product', 'quantity','total_price']
+        model = OrderItem
+        fields = ['id','product','unit_price', 'quantity']
 
         
 class OrderSerializer(serializers.ModelSerializer):
-    items = CartItemSerializer(many=True, read_only=True)  # Use 'items' for related name
+    items = OrderItemSerializer(many=True, read_only=True)  # Use 'items' for related name
     class Meta:
         model=Order
         fields=['id','customer','placed_at','payment_status','items']
+        
+#a class for updating an order:
+class UpdateOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Order
+        fields=['payment_status']
+    
+        
+class CreateOrderSerializer(serializers.Serializer):
+    cart_id=serializers.UUIDField()
+    
+    def validate_cart_id(self,cart_id):
+        if not Cart.objects.filter(pk=cart_id).exists():
+            raise serializers.ValidationError('No cart with the given was found')
+        if CartItem.objects.filter(cart_id=cart_id).count()==0:
+            raise serializers.ValidationError('the cart is empty')
+        return cart_id
+    
+    def save(self,**kwargs):
+        with transaction.atomic(): #the transaction.atomic method insures that either everycode in this block should be executed or if something goes wrong,all the saved changes should be rolled back
+            cart_id=self.validated_data['cart_id']
+            # print(self.validated_data['cart_id']) #print the cart_id on the terminal when created on the orders endpoint
+            # print(self.context['user_id']) #also print the user_id on the terminal for same case
+            customer=Customer.objects.get(user_id=self.context['user_id'])
+            order=Order.objects.create(customer=customer)
+            
+            cart_items=CartItem.objects\
+                            .select_related('product') \
+                            .filter(cart_id=cart_id)
+            
+            order_items=[
+                OrderItem(
+                    order=order,
+                    product=item.product,
+                    unit_price=item.product.unit_price,
+                    quantity=item.quantity
+                ) for item in cart_items
+            ]
+            OrderItem.objects.bulk_create(order_items)
+            
+            Cart.objects.filter(pk=cart_id).delete()
+            
+            order_created.send_robust(self.__class__,order=order)
+            
+            return order
