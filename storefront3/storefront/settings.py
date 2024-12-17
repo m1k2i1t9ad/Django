@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import os
 from pathlib import Path
 from datetime import timedelta
-
+from celery.schedules import crontab
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -181,9 +181,27 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1)
 }
 
-EMAIL_BACKEND='django.core .mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST='localhost'
 EMAIL_HOST_USER=''
 EMAIL_HOST_PASSWORD=''
 EMAIL_PORT=2525 #by default smtp servers run port 25,but since this is a fake smptp server,it runs on port 2525
 DEFAULT_FROM_EMAIL='info@moshbuy.com'
+
+ADMINS=[
+    ('Mosh','admin@moshbuy.com')
+]
+
+CELERY_BROKER_URL='redis://localhost:6379/1'
+
+CELERY_BEAT_SCHEDULE={
+    'notify_customers':{
+        'task':'playground.tasks.notify_customers',
+        # 'schedule': crontab(day_of_week=1, hour=7, minute=30) #means the task should be  executed every monday at 7:30
+        # 'schedule':crontab(minute='*/15'), #means every 15 minutes. 
+        # to know more about cront tabs,look at the celery documentaion on cofiguring celery beats
+        'schedule':5 , #every 5 seconds
+        'args':['hello world'],
+        
+    }
+}
